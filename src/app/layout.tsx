@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Bodoni_Moda, Manrope } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/shared/Navbar";
+import Footer from "@/components/shared/Footer";
 
 const bodoni = Bodoni_Moda({
   subsets: ["latin"],
@@ -26,7 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${bodoni.variable} ${manrope.variable}`}>
+        <Navbar/>
         {children}
+        <Footer/>
       </body>
     </html>
   );
