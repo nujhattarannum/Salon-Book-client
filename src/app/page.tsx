@@ -1,5 +1,6 @@
 import Hero from "@/components/homepage/Hero";
-import PopularServices from "@/components/homepage/PopularServices";
+import FeaturedSalonServices from "@/components/homepage/FeaturedSalonServices";
+import SalonServiceCategories from "@/components/homepage/SalonServiceCategories";
 import WhyChooseSalonBook from "@/components/homepage/WhyChooseSalonBook";
 import Footer from "@/components/shared/Footer";
 import Navbar from "@/components/shared/Navbar";
@@ -11,7 +12,8 @@ export default function Home() {
     <Navbar/>
     <main>
        <Hero/>
-       <PopularServices/>
+       <FeaturedSalonServices/>
+       <SalonServiceCategories/>
        <WhyChooseSalonBook/>
     </main>
     <Footer/>
