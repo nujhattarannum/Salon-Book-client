@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import { authClient } from "@/lib/auth-client"; // Adjust path to your Better Auth client
 import { AlertCircle, CheckCircle2, Upload, Eye, EyeOff } from "lucide-react";
 
@@ -18,7 +19,6 @@ export default function SignUpPage() {
 
   // Profile image (URL or uploaded file)
   const [imageUrl, setImageUrl] = useState("");
-  const [uploadingImage, setUploadingImage] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -53,44 +53,31 @@ export default function SignUpPage() {
     }
 
     setSubmitting(true);
-    try {
+ try {
       const { error } = await authClient.signUp.email({
         name: fullName.trim(),
         email: email.trim(),
         password,
         image: imageUrl.trim() || undefined,
-        // Public registration always defaults to standard customer role;
-        // admin access is assigned securely in the backend/database.
-        role: "customer",
       } as Parameters<typeof authClient.signUp.email>[0]);
 
       if (error) {
-        setFeedback({
-          type: "error",
-          text: error.message || "Registration failed. Please check your details and try again.",
-        });
+        toast.error(error.message || "Registration failed. Please check your details and try again.");
         return;
       }
 
-      setFeedback({
-        type: "success",
-        text: "Account created successfully! Redirecting...",
-      });
+      toast.success("Account created successfully! Redirecting...");
 
       setTimeout(() => {
         router.push("/services");
         router.refresh();
       }, 900);
     } catch {
-      setFeedback({
-        type: "error",
-        text: "An unexpected error occurred during registration.",
-      });
+      toast.error("An unexpected error occurred during registration.");
     } finally {
       setSubmitting(false);
     }
   };
-
   const handleGoogleSignUp = async () => {
     setGoogleLoading(true);
     setFeedback(null);

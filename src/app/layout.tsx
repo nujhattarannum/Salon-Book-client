@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Toaster } from "react-hot-toast";
 import { Bodoni_Moda, Manrope } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/shared/Navbar";
@@ -28,6 +29,36 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${bodoni.variable} ${manrope.variable}`}>
+       <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 3500,
+            style: {
+              background: "#FFFFFF",
+              color: "#1E1E1E",
+              border: "1px solid #E5E5E5",
+              borderRadius: "0px",
+              fontSize: "12px",
+              letterSpacing: "0.04em",
+              padding: "12px 16px",
+            },
+            success: {
+              iconTheme: {
+                primary: "#1E1E1E",
+                secondary: "#FFFFFF",
+              },
+            },
+            error: {
+              style: {
+                border: "1px solid #C87D6B",
+              },
+              iconTheme: {
+                primary: "#C87D6B",
+                secondary: "#FFFFFF",
+              },
+            },
+          }}
+        />
         <Navbar/>
         {children}
         <Footer/>
