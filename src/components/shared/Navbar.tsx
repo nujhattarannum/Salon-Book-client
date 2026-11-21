@@ -67,14 +67,14 @@ const Navbar = () => {
             <div className="h-6 w-px bg-neutral-300" />
 
             <Link
-              href="/login"
+              href="/signIn"
               className="text-sm hover:text-[#C87D6B] transition"
             >
               Sign In
             </Link>
 
             <Link
-              href="/signup"
+              href="/signUp"
               className="bg-[#C87D6B] text-white px-6 py-3 text-sm rounded-sm hover:bg-[#b56c5b] transition"
             >
               Sign Up
