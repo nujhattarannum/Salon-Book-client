@@ -101,10 +101,8 @@ const Navbar = () => {
                     onClick={() => setProfileOpen(!profileOpen)}
                     className="flex items-center gap-2"
                   >
-
                     {/* Profile Picture */}
                     <div className="w-10 h-10 rounded-full bg-[#F5E8E4] text-[#C87D6B] flex items-center justify-center overflow-hidden">
-
                       {user.image ? (
                         <img
                           src={user.image}
@@ -158,14 +156,14 @@ const Navbar = () => {
                         My Profile
                       </Link>
 
-                      {/* My Bookings */}
+                      {/* dashboard */}
                       <Link
-                        href="/myBookings"
+                        href={`/dasboard/${user?.role ?? ""}`}
                         onClick={() => setProfileOpen(false)}
                         className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-neutral-50 transition"
                       >
                         <CalendarDays size={17} />
-                        My Bookings
+                        dashboard
                       </Link>
 
                       {/* Sign Out */}
@@ -176,11 +174,8 @@ const Navbar = () => {
                         <LogOut size={17} />
                         Sign Out
                       </button>
-
                     </div>
-
                   )}
-
                 </div>
 
               ) : (
@@ -285,10 +280,10 @@ const Navbar = () => {
                   </Link>
 
                   <Link
-                    href="/myBookings"
+                    href={`/dasboard/${user?.role ?? ""}`}
                     onClick={() => setMenuOpen(false)}
                   >
-                    My Bookings
+                    dashboard
                   </Link>
 
                   <button
@@ -323,11 +318,8 @@ const Navbar = () => {
             )}
 
           </div>
-
         )}
-
       </nav>
-
     </header>
   );
 };
