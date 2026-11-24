@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import { authClient } from "@/lib/auth-client"; // Adjust path to your Better Auth client
 import {
   Clock,
@@ -49,10 +50,6 @@ export default function ServiceDetailsPage() {
   const [appointmentTime, setAppointmentTime] = useState("");
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [bookingFeedback, setBookingFeedback] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
 
   useEffect(() => {
     if (!serviceId) return;
@@ -61,7 +58,7 @@ export default function ServiceDetailsPage() {
       setLoading(true);
       setErrorMessage("");
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL;
         const res = await fetch(`${baseUrl}/services/${serviceId}`);
 
         if (res.status === 400 || res.status === 404) {
@@ -94,15 +91,12 @@ export default function ServiceDetailsPage() {
     loadService();
   }, [serviceId]);
 
-  const handleBookingSubmit = async (e: React.FormEvent) => {
+ const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setBookingFeedback(null);
+
 
     if (!service || !service.isActive) {
-      setBookingFeedback({
-        type: "error",
-        text: "This service is currently inactive and cannot be booked.",
-      });
+      toast.error("This service is currently inactive and cannot be booked.");
       return;
     }
 
@@ -112,24 +106,18 @@ export default function ServiceDetailsPage() {
     }
 
     if (user.role === "admin") {
-      setBookingFeedback({
-        type: "error",
-        text: "Admin accounts cannot submit customer appointment requests.",
-      });
+      toast.error("Admin accounts cannot submit customer appointment requests.");
       return;
     }
 
     if (!appointmentDate || !appointmentTime) {
-      setBookingFeedback({
-        type: "error",
-        text: "Please select both a preferred date and time.",
-      });
+      toast.error("Please select both a preferred date and time.");
       return;
     }
 
     setSubmitting(true);
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
       const res = await fetch(`${baseUrl}/appointments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -152,18 +140,14 @@ export default function ServiceDetailsPage() {
         throw new Error(result.message || "Could not submit your appointment request.");
       }
 
-      setBookingFeedback({
-        type: "success",
-        text: "Your appointment request has been submitted! We look forward to welcoming you.",
-      });
+      toast.success("Appointment request submitted! We look forward to welcoming you.");
       setAppointmentDate("");
       setAppointmentTime("");
       setNotes("");
     } catch (err) {
-      setBookingFeedback({
-        type: "error",
-        text: err instanceof Error ? err.message : "Something went wrong while booking.",
-      });
+      toast.error(
+        err instanceof Error ? err.message : "Something went wrong while booking."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -350,23 +334,6 @@ export default function ServiceDetailsPage() {
               ) : (
                 /* Authenticated Customer Form */
                 <form onSubmit={handleBookingSubmit} className="space-y-4">
-                  {bookingFeedback && (
-                    <div
-                      className={`p-4 text-xs leading-relaxed border flex items-start gap-2.5 ${
-                        bookingFeedback.type === "success"
-                          ? "bg-white border-emerald-600/40 text-emerald-900"
-                          : "bg-white border-[#C87D6B] text-[#1E1E1E]"
-                      }`}
-                    >
-                      {bookingFeedback.type === "success" ? (
-                        <CheckCircle2 size={16} className="text-emerald-700 shrink-0 mt-0.5" />
-                      ) : (
-                        <AlertCircle size={16} className="text-[#C87D6B] shrink-0 mt-0.5" />
-                      )}
-                      <span>{bookingFeedback.text}</span>
-                    </div>
-                  )}
-
                   <div>
                     <label className="block text-xs uppercase tracking-[0.18em] text-[#1E1E1E] mb-1.5">
                       Preferred Date

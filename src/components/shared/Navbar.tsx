@@ -158,7 +158,7 @@ const Navbar = () => {
 
                       {/* dashboard */}
                       <Link
-                        href={`/dasboard/${user?.role ?? ""}`}
+                        href={`/dashboard/${user?.role ?? ""}`}
                         onClick={() => setProfileOpen(false)}
                         className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-neutral-50 transition"
                       >
@@ -280,7 +280,7 @@ const Navbar = () => {
                   </Link>
 
                   <Link
-                    href={`/dasboard/${user?.role ?? ""}`}
+                    href={`/dashboard/${user?.role ?? ""}`}
                     onClick={() => setMenuOpen(false)}
                   >
                     dashboard
