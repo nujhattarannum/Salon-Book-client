@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Toaster } from "react-hot-toast";
+import PublicShell from "@/components/shared/PublicShell";
 import { Bodoni_Moda, Manrope } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/shared/Navbar";
@@ -59,9 +60,9 @@ export default function RootLayout({
             },
           }}
         />
-        <Navbar/>
+      <PublicShell>
         {children}
-        <Footer/>
+       </PublicShell>
       </body>
     </html>
   );
