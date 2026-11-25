@@ -99,16 +99,13 @@ isActive: boolean;
   createdAt: string;
 }
 
-export interface TransactionItem {
+export interface TransactionRecord {
   _id: string;
-  appointmentId: string;
-  customerId: string;
-  customerName: string;
-  serviceName: string;
-  appointmentDate: string;
+  transactionId?: string;
+  customerName?: string;
+  customerEmail?: string;
+  serviceName?: string;
   amount: number;
-  currency: string;
-  stripeSessionId: string;
-  status: "paid" | "failed";
+  status: "paid" | "succeeded" | "pending" | "failed" | string;
   createdAt: string;
 }
