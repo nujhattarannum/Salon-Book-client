@@ -19,6 +19,14 @@ export interface SidebarUser {
   isBlocked?: boolean;
 }
 
+export interface AdminStats {
+  totalCustomers: number;
+  totalServices: number;
+  totalAppointments: number;
+  pendingAppointments: number;
+  confirmedAppointments: number;
+  successfulPayments: number;
+}
 export interface SidebarNavItem {
   key: string;
   label: string;

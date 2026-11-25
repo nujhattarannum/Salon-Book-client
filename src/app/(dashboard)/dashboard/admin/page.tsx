@@ -1,60 +1,66 @@
 "use client";
 
-import React, { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
-import { authClient } from "@/lib/auth-client";
-import { SessionUser } from "@/types/salon";
+import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { apiRequest } from "@/lib/api";
+import { AdminStats } from "@/types/salon";
+import DashboardStats from "@/components/dashboard/DashboardStats";
 
-import AdminOverviewTab from "@/components/dashboard/admin/AdminOverviewTab";
-import ManageServicesTab from "@/components/dashboard/admin/ManageServicesTab";
-import ManageAppointmentsTab from "@/components/dashboard/admin/ManageAppointmentsTab";
-import ManageUsersTab from "@/components/dashboard/admin/ManageUsersTab";
-import TransactionsTab from "@/components/dashboard/admin/TransactionsTab";
-import AdminProfileTab from "@/components/dashboard/admin/AdminProfileTab";
-
-function AdminDashboardContent() {
-  const searchParams = useSearchParams();
-  const activeTab = searchParams.get("tab") || "overview";
-
-  const { data: session, isPending } = authClient.useSession();
-  const user = session?.user as SessionUser | undefined;
-
-  if (isPending || !user || user.role !== "admin") {
-    return (
-      <div className="py-16 flex justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-[#B85D68]" />
-      </div>
-    );
-  }
-
-  switch (activeTab) {
-    case "services":
-      return <ManageServicesTab />;
-    case "appointments":
-      return <ManageAppointmentsTab />;
-    case "users":
-      return <ManageUsersTab currentAdminId={user.id} />;
-    case "transactions":
-      return <TransactionsTab />;
-    case "profile":
-      return <AdminProfileTab user={user} />;
-    case "overview":
-    default:
-      return <AdminOverviewTab />;
-  }
-}
+const initialStats: AdminStats = {
+  totalCustomers: 0,
+  totalServices: 0,
+  totalAppointments: 0,
+  pendingAppointments: 0,
+  confirmedAppointments: 0,
+  successfulPayments: 0,
+};
 
 export default function AdminDashboardPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="py-16 flex justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-[#B85D68]" />
-        </div>
+  const [stats, setStats] = useState<AdminStats>(initialStats);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        setLoading(true);
+        const data = await apiRequest<{ stats?: AdminStats } & AdminStats>(
+          "/admin/stats"
+        );
+        setStats(data.stats || data);
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to load admin statistics."
+        );
+      } finally {
+        setLoading(false);
       }
-    >
-      <AdminDashboardContent />
-    </Suspense>
+    }
+
+    loadStats();
+  }, []);
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="font-editorial text-2xl text-[#121212]">
+          Dashboard Overview
+        </h2>
+        <p className="mt-1 text-sm text-neutral-500">
+          Here&apos;s what&apos;s happening at your salon.
+        </p>
+      </div>
+
+      <DashboardStats stats={stats} loading={loading} />
+
+      <div className="rounded-xl border border-[#EAE4DC] bg-white p-6">
+        <p className="font-editorial text-2xl text-[#121212]">
+          Welcome to SalonBook
+        </p>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">
+          Keep track of your services, appointment requests, customers, and
+          payments from one place.
+        </p>
+      </div>
+    </div>
   );
 }
