@@ -10,6 +10,15 @@ export interface SessionUser {
 }
 export type UserRole = "customer" | "admin";
 
+export interface AdminUserRecord {
+  _id: string;
+  id?: string;
+  name: string;
+  email: string;
+  role: UserRole | string;
+  isBlocked?: boolean;
+}
+
 export interface SidebarUser {
   id: string;
   name: string;

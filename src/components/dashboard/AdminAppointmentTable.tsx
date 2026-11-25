@@ -7,7 +7,9 @@ import StatusBadge from "./StatusBadge";
 interface AdminAppointmentTableProps {
   appointments: AppointmentItem[];
   loading: boolean;
-  onStatusChange: (id: string, status: string) => void;
+ onStatusChange: (
+  id: string,
+  status: AppointmentItem["status"]) => void;
 }
 
 export default function AdminAppointmentTable({
@@ -68,7 +70,7 @@ export default function AdminAppointmentTable({
                 <td className="px-5 py-4 text-right">
                   <select
                     value={appt.status}
-                    onChange={(e) => onStatusChange(appt._id, e.target.value)}
+                    onChange={(e) => onStatusChange(appt._id,  e.target.value as AppointmentItem["status"] )}
                     className="rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs outline-none focus:border-[#C87D6B]"
                   >
                     <option value="pending">Pending</option>
