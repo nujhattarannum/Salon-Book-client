@@ -47,6 +47,28 @@ export interface SidebarNavItem {
 export type AppointmentStatus = "pending" | "confirmed" | "cancelled";
 export type PaymentStatus = "unpaid" | "paid";
 
+export interface CustomerStats {
+  totalAppointments: number;
+  pendingAppointments: number;
+  confirmedAppointments: number;
+  cancelledAppointments: number;
+}
+
+export interface CustomerAppointmentItem {
+  _id: string;
+  serviceId: string;
+  serviceName: string;
+  serviceImage?: string;
+  serviceCategory?: string;
+  serviceDuration?: number;
+  servicePrice: number;
+  appointmentDate: string;
+  timeSlot: string;
+  status: "pending" | "confirmed" | "completed" | "cancelled" | string;
+  paymentStatus: "paid" | "unpaid" | string;
+  message?: string;
+  createdAt: string;
+}
 export interface AppointmentItem {
   _id: string;
   serviceId: string;
