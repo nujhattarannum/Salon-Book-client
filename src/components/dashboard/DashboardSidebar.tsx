@@ -3,14 +3,13 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   CalendarCheck,
   CreditCard,
   LayoutDashboard,
   LogOut,
   Scissors,
-  Sparkles,
   UserCircle,
   Users,
   X,
@@ -101,7 +100,9 @@ export default function DashboardSidebar({
 }: DashboardSidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
+const searchParams = useSearchParams();
 
+const currentTab = searchParams.get("tab") || "overview";
   const navItems = getSidebarItemsByRole(user.role);
 
   const handleItemClick = (item: SidebarNavItem) => {
@@ -123,36 +124,34 @@ export default function DashboardSidebar({
     <div className="flex h-full flex-col justify-between bg-[#FFFDFB] border-r border-[#EAE4DC] text-[#1F191E]">
       <div>
         {/* SalonBook Brand Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-[#EAE4DC]">
-          <Link
-            href="/"
-            onClick={() => onCloseMobile?.()}
-            className="flex items-center gap-2.5"
-          >
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#B85D68]/12 text-[#B85D68]">
-              <Sparkles className="h-5 w-5" />
-            </span>
-            <div>
-              <span className="block font-serif text-lg font-semibold tracking-tight text-[#1F191E]">
-                SalonBook
-              </span>
-              <span className="block text-[11px] uppercase tracking-wider text-[#6E636B]">
-                {user.role === "admin" ? "Studio Admin" : "Customer Portal"}
-              </span>
-            </div>
-          </Link>
+       <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-200">
+  <Link
+    href="/"
+    onClick={() => onCloseMobile?.()}
+    className="flex items-center gap-2.5"
+  >
+    <div>
+      <span className="block font-editorial text-2xl tracking-tight text-[#121212]">
+        Salon<span className="text-[#c87d6b]">Book</span>
+      </span>
 
-          {onCloseMobile && (
-            <button
-              type="button"
-              onClick={onCloseMobile}
-              className="lg:hidden rounded-lg p-1.5 text-[#6E636B] hover:bg-[#F5F0EA]"
-              aria-label="Close sidebar"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          )}
-        </div>
+      <span className="block text-[10px] uppercase tracking-[0.18em] text-neutral-500">
+        {user.role === "admin" ? "Studio Admin" : "Customer Portal"}
+      </span>
+    </div>
+  </Link>
+
+  {onCloseMobile && (
+    <button
+      type="button"
+      onClick={onCloseMobile}
+      className="lg:hidden rounded-lg p-1.5 text-neutral-500 hover:bg-[#f9f9f9]"
+      aria-label="Close sidebar"
+    >
+      <X className="h-5 w-5" />
+    </button>
+  )}
+</div>
 
         {/* Role-Filtered Navigation Menu */}
         <nav
@@ -163,7 +162,8 @@ export default function DashboardSidebar({
             const isActive =
               activeKey !== undefined
                 ? activeKey === item.key
-                : pathname === item.href?.split("?")[0];
+                :  pathname === item.href?.split("?")[0] &&
+      currentTab === item.key;
 
             return (
               <button
