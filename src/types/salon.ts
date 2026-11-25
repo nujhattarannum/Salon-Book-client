@@ -30,7 +30,7 @@ export interface AdminStats {
 export interface SidebarNavItem {
   key: string;
   label: string;
-  href?: string;
+  href: string;
   icon: React.ReactNode;
 }
 
@@ -64,7 +64,7 @@ export interface SalonServiceItem {
   price: number;
   duration: number; // minutes
   image: string;
-  status: "active" | "inactive";
+isActive: boolean;
   createdAt: string;
 }
 

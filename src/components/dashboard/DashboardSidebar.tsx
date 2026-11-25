@@ -1,14 +1,14 @@
-// src/components/dashboard/DashboardSidebar.tsx
 "use client";
 
 import React from "react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   CalendarCheck,
   CreditCard,
   LayoutDashboard,
   LogOut,
+  PlusCircle,
   Scissors,
   UserCircle,
   Users,
@@ -16,24 +16,23 @@ import {
 } from "lucide-react";
 import { SidebarNavItem, SidebarUser, UserRole } from "@/types/salon";
 
-
 export const CUSTOMER_SIDEBAR_ITEMS: SidebarNavItem[] = [
   {
     key: "overview",
     label: "Overview",
-    href: "/dashboard/customer?tab=overview",
+    href: "/dashboard/customer",
     icon: <LayoutDashboard className="h-4 w-4" />,
   },
   {
     key: "appointments",
     label: "My Appointments",
-    href: "/dashboard/customer?tab=appointments",
+    href: "/dashboard/customer/appointments",
     icon: <CalendarCheck className="h-4 w-4" />,
   },
   {
     key: "profile",
     label: "My Profile",
-    href: "/dashboard/customer?tab=profile",
+    href: "/dashboard/customer/profile",
     icon: <UserCircle className="h-4 w-4" />,
   },
 ];
@@ -42,45 +41,49 @@ export const ADMIN_SIDEBAR_ITEMS: SidebarNavItem[] = [
   {
     key: "overview",
     label: "Overview",
-    href: "/dashboard/admin?tab=overview",
+    href: "/dashboard/admin",
     icon: <LayoutDashboard className="h-4 w-4" />,
   },
   {
     key: "services",
     label: "Manage Services",
-    href: "/dashboard/admin?tab=services",
+    href: "/dashboard/admin/services",
     icon: <Scissors className="h-4 w-4" />,
+  },
+  {
+    key: "add-service",
+    label: "Add/Update Service",
+    href: "/dashboard/admin/services/new",
+    icon: <PlusCircle className="h-4 w-4" />,
   },
   {
     key: "appointments",
     label: "Manage Appointments",
-    href: "/dashboard/admin?tab=appointments",
+    href: "/dashboard/admin/appointments",
     icon: <CalendarCheck className="h-4 w-4" />,
   },
   {
     key: "users",
     label: "Manage Users",
-    href: "/dashboard/admin?tab=users",
+    href: "/dashboard/admin/users",
     icon: <Users className="h-4 w-4" />,
   },
   {
     key: "transactions",
     label: "Transactions",
-    href: "/dashboard/admin?tab=transactions",
+    href: "/dashboard/admin/transactions",
     icon: <CreditCard className="h-4 w-4" />,
   },
   {
     key: "profile",
     label: "My Profile",
-    href: "/dashboard/admin?tab=profile",
+    href: "/dashboard/admin/profile",
     icon: <UserCircle className="h-4 w-4" />,
   },
 ];
 
 interface DashboardSidebarProps {
   user: SidebarUser;
-  activeKey?: string;
-  onSelectItem?: (key: string) => void;
   onLogout: () => Promise<void> | void;
   mobileOpen?: boolean;
   onCloseMobile?: () => void;
@@ -92,84 +95,51 @@ export function getSidebarItemsByRole(role: UserRole): SidebarNavItem[] {
 
 export default function DashboardSidebar({
   user,
-  activeKey,
-  onSelectItem,
   onLogout,
   mobileOpen = false,
   onCloseMobile,
 }: DashboardSidebarProps) {
-  const router = useRouter();
   const pathname = usePathname();
-const searchParams = useSearchParams();
-
-const currentTab = searchParams.get("tab") || "overview";
   const navItems = getSidebarItemsByRole(user.role);
-
-  const handleItemClick = (item: SidebarNavItem) => {
-    if (onSelectItem) {
-      onSelectItem(item.key);
-    } else if (item.href) {
-      router.push(item.href);
-    }
-    onCloseMobile?.();
-  };
 
   const handleLogoutClick = async () => {
     await onLogout();
-    onCloseMobile?.();
-    router.push("/sign-in");
   };
 
   const body = (
     <div className="flex h-full flex-col justify-between bg-[#FFFDFB] border-r border-[#EAE4DC] text-[#1F191E]">
       <div>
-        {/* SalonBook Brand Header */}
-       <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-200">
-  <Link
-    href="/"
-    onClick={() => onCloseMobile?.()}
-    className="flex items-center gap-2.5"
-  >
-    <div>
-      <span className="block font-editorial text-2xl tracking-tight text-[#121212]">
-        Salon<span className="text-[#c87d6b]">Book</span>
-      </span>
+        <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-200">
+          <Link href="/" onClick={() => onCloseMobile?.()}>
+            <span className="block font-editorial text-2xl tracking-tight text-[#121212]">
+              Salon<span className="text-[#c87d6b]">Book</span>
+            </span>
+            <span className="block text-[10px] uppercase tracking-[0.18em] text-neutral-500">
+              {user.role === "admin" ? "Studio Admin" : "Customer Portal"}
+            </span>
+          </Link>
 
-      <span className="block text-[10px] uppercase tracking-[0.18em] text-neutral-500">
-        {user.role === "admin" ? "Studio Admin" : "Customer Portal"}
-      </span>
-    </div>
-  </Link>
+          {onCloseMobile && (
+            <button
+              type="button"
+              onClick={onCloseMobile}
+              className="lg:hidden rounded-lg p-1.5 text-neutral-500 hover:bg-[#f9f9f9]"
+              aria-label="Close sidebar"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
+        </div>
 
-  {onCloseMobile && (
-    <button
-      type="button"
-      onClick={onCloseMobile}
-      className="lg:hidden rounded-lg p-1.5 text-neutral-500 hover:bg-[#f9f9f9]"
-      aria-label="Close sidebar"
-    >
-      <X className="h-5 w-5" />
-    </button>
-  )}
-</div>
-
-        {/* Role-Filtered Navigation Menu */}
-        <nav
-          className="px-3 py-4 space-y-1"
-          aria-label={`${user.role === "admin" ? "Admin" : "Customer"} dashboard navigation`}
-        >
+        <nav className="px-3 py-4 space-y-1">
           {navItems.map((item) => {
-            const isActive =
-              activeKey !== undefined
-                ? activeKey === item.key
-                :  pathname === item.href?.split("?")[0] &&
-      currentTab === item.key;
+            const isActive = pathname === item.href;
 
             return (
-              <button
+              <Link
                 key={item.key}
-                type="button"
-                onClick={() => handleItemClick(item)}
+                href={item.href}
+                onClick={() => onCloseMobile?.()}
                 aria-current={isActive ? "page" : undefined}
                 className={`w-full flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${
                   isActive
@@ -181,12 +151,11 @@ const currentTab = searchParams.get("tab") || "overview";
                   {item.icon}
                 </span>
                 <span>{item.label}</span>
-              </button>
+              </Link>
             );
           })}
         </nav>
 
-        {/* Quick Link to Public Catalog */}
         <div className="px-6 pt-2">
           <Link
             href="/services"
@@ -199,7 +168,6 @@ const currentTab = searchParams.get("tab") || "overview";
         </div>
       </div>
 
-      {/* Authenticated User Profile & Sign Out */}
       <div className="p-4 border-t border-[#EAE4DC] bg-[#FAF8F5]/75">
         <div className="flex items-center gap-3 mb-3">
           <img
@@ -223,7 +191,7 @@ const currentTab = searchParams.get("tab") || "overview";
         <button
           type="button"
           onClick={handleLogoutClick}
-          className="w-full flex items-center justify-center gap-2 rounded-xl border border-[#E2D9CE] bg-white px-3 py-2 text-xs font-medium text-[#4A4047] hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 transition-colors"
+          className="w-full flex items-center justify-center gap-2 rounded-xl border border-[#E2D9CE] bg-white px-3 py-2 text-xs font-medium text-[#4A4047] hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 transition-colors cursor-pointer"
         >
           <LogOut className="h-3.5 w-3.5" />
           <span>Sign Out</span>
@@ -234,12 +202,10 @@ const currentTab = searchParams.get("tab") || "overview";
 
   return (
     <>
-      {/* Desktop Fixed Sidebar */}
       <aside className="hidden lg:block w-64 shrink-0">
         <div className="fixed top-0 left-0 h-screen w-64">{body}</div>
       </aside>
 
-      {/* Mobile Slide-Over Drawer */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden flex">
           <div
