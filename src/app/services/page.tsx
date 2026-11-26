@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-import SalonCard, { SalonService } from "@/components/shared/SalonCard";
+import SalonCard from "@/components/shared/SalonCard";
 
 import {
   Search,
@@ -12,12 +12,13 @@ import {
   ArrowUpDown,
   X,
 } from "lucide-react";
+import { SalonServiceItem } from "@/types/salon";
 
 const BrowseServicesContent = () => {
   const searchParams = useSearchParams();
   const urlCategory = searchParams.get("category");
 
-  const [services, setServices] = useState<SalonService[]>([]);
+  const [services, setServices] = useState<SalonServiceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -43,7 +44,7 @@ const BrowseServicesContent = () => {
 
         const data = await res.json();
 
-        const serviceList: SalonService[] = Array.isArray(data)
+        const serviceList: SalonServiceItem[] = Array.isArray(data)
           ? data
           : data.services || [];
 
@@ -115,32 +116,23 @@ const BrowseServicesContent = () => {
 
 
       {/* Page Header */}
-      <section className="bg-[#F9F9F9] py-16 md:py-24">
+     <section className="bg-[#f9f9f9] py-10 md:py-14">
+  <div className="max-w-[1250px] mx-auto px-6 md:px-12 text-center">
 
-        <div className="max-w-[1450px] mx-auto px-6 md:px-12 text-center">
+    <p className="text-[#c87d6b] text-[10px] md:text-xs uppercase tracking-[0.25em] mb-3">
+      Discover Your Beauty
+    </p>
 
-          <div className="flex items-center justify-center gap-4">
+    <h1 className="font-editorial text-3xl md:text-5xl leading-tight">
+      Browse Our <span className="italic text-[#c87d6b]">Services</span>
+    </h1>
 
-            <span className="w-12 md:w-20 h-px bg-[#C87D6B]" />
+    <p className="max-w-xl mx-auto mt-3 text-neutral-600 text-sm leading-6">
+      Explore our salon treatments and find the perfect service for your next self-care moment.
+    </p>
 
-            <p className="text-[#C87D6B] text-xs uppercase tracking-[0.25em]">
-              Discover Your Beauty
-            </p>
-
-            <span className="w-12 md:w-20 h-px bg-[#C87D6B]" />
-          </div>
-
-          <h1 className="font-editorial text-5xl md:text-7xl mt-5">
-            Browse Services
-          </h1>
-
-          <p className="text-neutral-500 max-w-xl mx-auto mt-5 leading-7 text-sm md:text-base">
-            Explore our curated beauty services and find the perfect
-            treatment to make you feel confident, refreshed, and beautiful.
-          </p>
-        </div>
-      </section>
-
+  </div>
+</section>
       {/* Services Section */}
       <section className="py-16 md:py-20">
 

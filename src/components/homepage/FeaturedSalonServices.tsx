@@ -2,33 +2,32 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import SalonCard, { SalonService } from "../shared/SalonCard";
+import SalonCard from "../shared/SalonCard";
 import { ArrowRight } from "lucide-react";
+import { apiRequest } from "@/lib/api";
+import { SalonServiceItem } from "@/types/salon";
 
 const FeaturedSalonServices = () => {
-  const [services, setServices] = useState<SalonService[]>([]);
+  const [services, setServices] = useState<SalonServiceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
 
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await fetch("http://localhost:8000/services");
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch services");
-        }
-
-        const data = await res.json();
+        const res = await apiRequest<
+          { services: SalonServiceItem[] } | SalonServiceItem[]
+        >("/services");
 
         // Supports either an array or an object containing services
-        const serviceList = Array.isArray(data)
-          ? data
-          : data.services || [];
+        const serviceList = Array.isArray(res)
+          ? res
+          : res.services || [];
 
         // Only active services
         const activeServices = serviceList.filter(
-          (service: SalonService) => service.isActive === true
+          (service: SalonServiceItem) => service.isActive === true
         );
 
         setServices(activeServices.slice(0, 6));

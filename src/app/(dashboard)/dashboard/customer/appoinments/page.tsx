@@ -12,6 +12,8 @@ import ConfirmDialog from "@/components/dashboard/ConfirmDialog";
 export default function CustomerAppointmentsPage() {
   const { data: session } = authClient.useSession();
   const user = session?.user as SessionUser | undefined;
+  const userId = user?.id;
+  const userEmail = user?.email;
 
   const [appointments, setAppointments] = useState<CustomerAppointmentItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,28 +22,82 @@ export default function CustomerAppointmentsPage() {
   const [cancelling, setCancelling] = useState(false);
   const [payingId, setPayingId] = useState<string | null>(null);
 
+  // 1. Fetch customer appointments on load
   useEffect(() => {
-      const loadAppointments = async () => {
-    if (!user?.id) return;
-    try {
-      setLoading(true);
-      const query = user?.email
-        ? `?customerEmail=${encodeURIComponent(user.email)}`
-        : "";
-      const data = await apiRequest<
-        | { appointments?: CustomerAppointmentItem[] }
-        | CustomerAppointmentItem[]
-      >(`/customer/appointments${query}`);
-      setAppointments(Array.isArray(data) ? data : data.appointments || []);
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Failed to load your appointments."
-      );
-    } finally {
-      setLoading(false);
+    if (!userId) return;
+    let isMounted = true;
+
+    async function fetchAppointments() {
+      try {
+        const query = userEmail
+          ? `?customerEmail=${encodeURIComponent(userEmail)}`
+          : "";
+        const data = await apiRequest<
+          | { appointments?: CustomerAppointmentItem[] }
+          | CustomerAppointmentItem[]
+        >(`/customer/appointments${query}`);
+
+        if (isMounted) {
+          setAppointments(Array.isArray(data) ? data : data.appointments || []);
+        }
+      } catch (err) {
+        if (isMounted) {
+          toast.error(
+            err instanceof Error ? err.message : "Failed to load your appointments."
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
     }
-  };
-  }, [user?.id, user?.email]);
+
+    fetchAppointments();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [userId, userEmail]);
+
+  // 2. Verify Stripe Checkout Session when returning from Stripe
+  useEffect(() => {
+    if (!userId || typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    const payment = params.get("payment");
+    const sessionId = params.get("session_id");
+
+    if (payment === "success" && sessionId) {
+      (async () => {
+        try {
+          await apiRequest("/customer/appointments/confirm-checkout", {
+            method: "POST",
+            body: JSON.stringify({ sessionId }),
+          });
+          toast.success("Payment completed! Your appointment is now marked as paid.");
+
+          const query = userEmail
+            ? `?customerEmail=${encodeURIComponent(userEmail)}`
+            : "";
+          const data = await apiRequest<
+            | { appointments?: CustomerAppointmentItem[] }
+            | CustomerAppointmentItem[]
+          >(`/customer/appointments${query}`);
+          setAppointments(Array.isArray(data) ? data : data.appointments || []);
+        } catch (err) {
+          toast.error(
+            err instanceof Error ? err.message : "Could not confirm payment."
+          );
+        } finally {
+          window.history.replaceState({}, "", "/dashboard/customer/appointments");
+        }
+      })();
+    } else if (payment === "cancelled") {
+      toast.error("Stripe checkout was cancelled.");
+      window.history.replaceState({}, "", "/dashboard/customer/appointments");
+    }
+  }, [userId, userEmail]);
 
   const handleConfirmCancel = async () => {
     if (!cancelTarget) return;
@@ -49,7 +105,7 @@ export default function CustomerAppointmentsPage() {
     try {
       await apiRequest(`/customer/appointments/${cancelTarget._id}/cancel`, {
         method: "PATCH",
-        body: JSON.stringify({ customerEmail: user?.email }),
+        body: JSON.stringify({ customerEmail: userEmail }),
       });
       toast.success("Pending appointment cancelled.");
       setAppointments((prev) =>
@@ -71,21 +127,23 @@ export default function CustomerAppointmentsPage() {
     if (appt.status !== "confirmed" || appt.paymentStatus === "paid") return;
     setPayingId(appt._id);
     try {
-      await apiRequest(`/customer/appointments/${appt._id}/pay`, {
-        method: "POST",
-        body: JSON.stringify({ customerEmail: user?.email }),
-      });
-      toast.success(`Payment completed for ${appt.serviceName}.`);
-      setAppointments((prev) =>
-        prev.map((a) =>
-          a._id === appt._id ? { ...a, paymentStatus: "paid" } : a
-        )
+      const data = await apiRequest<{ url: string }>(
+        `/customer/appointments/${appt._id}/create-checkout-session`,
+        {
+          method: "POST",
+          body: JSON.stringify({ customerEmail: userEmail }),
+        }
       );
+
+      if (!data.url) {
+        throw new Error("Could not get Stripe checkout URL.");
+      }
+
+      window.location.assign(data.url);
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Payment could not be completed."
+        err instanceof Error ? err.message : "Payment could not be started."
       );
-    } finally {
       setPayingId(null);
     }
   };
@@ -209,7 +267,7 @@ export default function CustomerAppointmentsPage() {
                             className="inline-flex items-center gap-1 rounded-lg bg-[#1E1E1E] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#C87D6B] disabled:opacity-60 cursor-pointer"
                           >
                             <CreditCard className="h-3.5 w-3.5" />
-                            {payingId === appt._id ? "Paying..." : "Pay Now"}
+                            {payingId === appt._id ? "Redirecting..." : "Pay Now"}
                           </button>
                         )}
                       </div>

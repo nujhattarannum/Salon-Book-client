@@ -89,7 +89,7 @@ export interface AppointmentItem {
 
 export interface SalonServiceItem {
   _id: string;
-  serviceName: string;
+  name: string;
   category: string;
   description: string;
   price: number;

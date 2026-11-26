@@ -15,20 +15,33 @@ export default function AdminServicesPage() {
   const [deleteTarget, setDeleteTarget] = useState<SalonServiceItem | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => {
-     const fetchServices = async () => {
+
+useEffect(() => {
+  const fetchServices = async () => {
     try {
+      setLoading(true);
+
       const data = await apiRequest<
-        { services?: SalonServiceItem[] } |SalonServiceItem[]
+        { services?: SalonServiceItem[] } | SalonServiceItem[]
       >("/admin/services");
-      setServices(Array.isArray(data) ? data : data.services || []);
+
+      setServices(
+        Array.isArray(data) ? data : data.services || []
+      );
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to load services.");
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : "Failed to load services."
+      );
     } finally {
       setLoading(false);
     }
   };
-  }, []);
+
+  fetchServices(); // This was missing!
+}, []);
+
 
   const handleToggleActive = async (service: SalonServiceItem) => {
     try {
@@ -112,7 +125,7 @@ export default function AdminServicesPage() {
               services.map((service) => (
                 <tr key={service._id} className="hover:bg-neutral-50/70">
                   <td className="px-5 py-4 font-medium text-[#1E1E1E]">
-                    {service.serviceName}
+                    {service.name}
                   </td>
                   <td className="px-5 py-4 text-neutral-600">
                     {service.category}
@@ -163,7 +176,7 @@ export default function AdminServicesPage() {
       <ConfirmDialog
         open={Boolean(deleteTarget)}
         title="Delete Service"
-        description={`Are you sure you want to delete "${deleteTarget?.serviceName}"? This action cannot be undone.`}
+        description={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
         confirmLabel="Delete"
         loading={deleting}
         onConfirm={handleConfirmDelete}

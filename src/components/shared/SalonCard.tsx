@@ -1,19 +1,10 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { SalonServiceItem } from "@/types/salon";
 
-export interface SalonService {
-  _id: string;
-  name: string;
-  category: string;
-  price: number;
-  duration: number;
-  description: string;
-  image: string;
-  isActive: boolean;
-}
 
 interface SalonCardProps {
-  service: SalonService;
+  service: SalonServiceItem;
 }
 
 const SalonCard = ({ service }: SalonCardProps) => {
